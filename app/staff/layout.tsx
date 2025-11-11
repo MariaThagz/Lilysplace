@@ -16,7 +16,8 @@ import {
   Lock,
   BarChart3,
   ChevronDown,
-  Settings
+  ShoppingCart,
+  DollarSign,
 } from 'lucide-react';
 
 const navigation = [
@@ -25,6 +26,8 @@ const navigation = [
   { name: 'Food', href: '/staff/food', icon: UtensilsCrossed },
   { name: 'Car Wash', href: '/staff/carwash', icon: Car },
   { name: 'Analytics', href: '/staff/analytics', icon: BarChart3 },
+  {name: 'Purchases', href: '/staff/purchases', icon: ShoppingCart },
+  { name: 'Expenses', href: '/staff/expenses', icon: DollarSign },
 ];
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
