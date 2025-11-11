@@ -2,8 +2,8 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, 
   Wine, 
@@ -13,7 +13,10 @@ import {
   X,
   LogOut,
   UserCircle,
-  Lock
+  Lock,
+  BarChart3,
+  ChevronDown,
+  Settings
 } from 'lucide-react';
 
 const navigation = [
@@ -21,6 +24,7 @@ const navigation = [
   { name: 'Alcohol', href: '/staff/alcohol', icon: Wine },
   { name: 'Food', href: '/staff/food', icon: UtensilsCrossed },
   { name: 'Car Wash', href: '/staff/carwash', icon: Car },
+  { name: 'Analytics', href: '/staff/analytics', icon: BarChart3 },
 ];
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
@@ -29,7 +33,10 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if user is already authenticated on mount
   useEffect(() => {
@@ -39,11 +46,26 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleLogin = () => {
     if (username === 'staff' && password === 'lily2024') {
       setIsAuthenticated(true);
       localStorage.setItem('staffAuth', 'true');
       setError('');
+      if (pathname === '/staff') {
+        router.refresh();
+      }
     } else {
       setError('Invalid credentials');
     }
@@ -54,6 +76,13 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
     setUsername('');
     setPassword('');
     localStorage.removeItem('staffAuth');
+    setUserDropdownOpen(false);
+    router.push('/staff');
+  };
+
+  const handleProfileClick = () => {
+    router.push('/staff/profile');
+    setUserDropdownOpen(false);
   };
 
   // Show login page if not authenticated
@@ -205,19 +234,49 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
             })}
           </nav>
 
-          {/* User info & Logout */}
-          <div className="p-4 border-t border-gray-700">
-            <div className="flex items-center gap-3 px-4 py-3 text-gray-300 mb-2">
-              <UserCircle className="w-5 h-5" />
-              <span className="text-sm">Staff User</span>
+          {/* User info & Dropdown */}
+          <div className="p-4 border-t border-gray-700" ref={dropdownRef}>
+            <div className="relative">
+              {/* User dropdown trigger */}
+              <button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors group"
+              >
+                <UserCircle className="w-5 h-5" />
+                <span className="text-sm font-medium flex-1 text-left">Staff User</span>
+                <ChevronDown 
+                  className={`w-4 h-4 transition-transform ${
+                    userDropdownOpen ? 'rotate-180' : ''
+                  }`} 
+                />
+              </button>
+
+              {/* Dropdown menu */}
+              {userDropdownOpen && (
+                <motion.div
+                  className="absolute bottom-full left-0 right-0 mb-2 bg-gray-700 border border-gray-600 rounded-lg shadow-lg overflow-hidden"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                >
+                  <button
+                    onClick={handleProfileClick}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-600 hover:text-white transition-colors text-left"
+                  >
+                    <UserCircle className="w-4 h-4" />
+                    <span className="text-sm">My Profile</span>
+                  </button>
+                  
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-red-500/20 hover:text-red-400 transition-colors text-left border-t border-gray-600"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="text-sm">Logout</span>
+                  </button>
+                </motion.div>
+              )}
             </div>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Logout</span>
-            </button>
           </div>
         </div>
 

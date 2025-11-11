@@ -11,7 +11,7 @@ export default function About() {
           src="/chef1.jpg"
           alt="Chef Background"
           fill
-          className="object-cover brightness-50"
+          className="object-cover object-center brightness-50"
           priority
         />
       </div>
@@ -97,14 +97,7 @@ export default function About() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <div className="relative w-full h-[600px] bg-black rounded-lg overflow-hidden shadow-2xl">
-                <Image 
-                  src="/about.jpeg"
-                  alt="Delicious Food at Lily's Place"
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              
             </motion.div>
 
           </div>
